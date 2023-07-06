@@ -4,6 +4,21 @@
   /* Ajoutez d'autres formats de police ici si nécessaire */
 }
 
+/* Pour les navigateurs basés sur WebKit */
+::-webkit-scrollbar {
+  width: 12px;
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: #2c2c2c; /* Couleur de fond de la scrollbar */
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #24fe41; /* Couleur de la poignée de la scrollbar */
+  border-radius: 6px;
+}
+
 body {
   background-image: url("../public/assets/retro_bg.jpg");
   color: #000000;
