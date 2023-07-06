@@ -1,28 +1,24 @@
-## Usage
+<!-- PROJECT LOGO -->
+<h1 align="center">Tic_Tac_Toe</h1>
+<div align="center">
+  <img src="tic_tac_toe.png" alt="Logo" width="80" height="80">
+</div>
 
-```bash
-$ npm install # or pnpm install or yarn install
-```
+# Présentation du projet
 
-### Learn more on the [Solid Website](https://solidjs.com) and come chat with us on our [Discord](https://discord.com/invite/solidjs)
+Ceci est une application de jeu Tic Tac Toe réalisée en Python. Il s'agit d'un jeu classique à deux joueurs, également connu sous le nom de "Morpion".
 
-## Available Scripts
+# Fonctionnalités
 
-In the project directory, you can run:
+- Le jeu se déroule sur une grille 3x3.
+- Deux joueurs peuvent s'affronter : X et O.
+- Les joueurs alternent pour placer leurs marques sur la grille jusqu'à ce qu'un joueur gagne ou que le jeu se termine par un match nul.
+- Un joueur gagne s'il réussit à aligner trois de ses marques horizontalement, verticalement ou en diagonale.
+- Si la grille est remplie et qu'aucun joueur n'a gagné, le jeu se termine par un match nul.
 
-### `npm run dev`
+<!-- Réalisé -->
+# Réalisé avec :
 
-Runs the app in the development mode.<br>
-Open [http://localhost:5173](http://localhost:5173) to view it in the browser.
-
-### `npm run build`
-
-Builds the app for production to the `dist` folder.<br>
-It correctly bundles Solid in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.<br>
-Your app is ready to be deployed!
-
-## Deployment
-
-Learn more about deploying your application with the [documentations](https://vitejs.dev/guide/static-deploy.html)
+* SolidJS
+* HTML/CSS/JS
+* Bootstrap
