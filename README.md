@@ -1,7 +1,7 @@
 <!-- PROJECT LOGO -->
-<h1 align="center">Tic_Tac_Toe</h1>
+<h1 align="center">Morpion en SolidJS</h1>
 <div align="center">
-  <img src="tic_tac_toe.png" alt="Logo" width="80" height="80">
+  <img src="./public/assets/tic_tac_toe.png" alt="Logo" width="80" height="80">
 </div>
 
 # Présentation du projet
