@@ -6,7 +6,7 @@
 
 # Présentation du projet
 
-Ceci est une application de jeu Tic Tac Toe réalisée en Python. Il s'agit d'un jeu classique à deux joueurs, également connu sous le nom de "Morpion".
+Ceci est une application de jeu de Morpion réalisée en SolidJS et Bootstrap. Il s'agit d'un jeu classique à deux joueurs, également connu sous le nom de "Tic Tac Toe" en anglais.
 
 # Fonctionnalités
 
