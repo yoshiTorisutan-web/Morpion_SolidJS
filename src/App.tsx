@@ -14,6 +14,7 @@ const TicTacToe: Component = () => {
   const [status, setStatus] = createSignal<string>("En cours");
   const [winCountX, setWinCountX] = createSignal(0);
   const [winCountO, setWinCountO] = createSignal(0);
+  const [computerName, setComputerName] = createSignal("MorpionIA");
   const [player1Name, setPlayer1Name] = createSignal("");
   const [player2Name, setPlayer2Name] = createSignal("");
   const [player1Symbol, setPlayer1Symbol] = createSignal("X");
@@ -26,25 +27,29 @@ const TicTacToe: Component = () => {
 
   const [player1Time, setPlayer1Time] = createSignal(0);
   const [player2Time, setPlayer2Time] = createSignal(0);
+  const [maxTurnTime] = createSignal(10); // Temps maximal en secondes pour chaque tour
+  const [gameInProgress, setGameInProgress] = createSignal(false);
 
-  const [maxTurnTime] = createSignal(30);
-
-  const timerInterval = 1000;
+  const timerInterval = 1000; // Interval de 1 seconde pour le timer
 
   createEffect(() => {
-    const timer = setInterval(() => {
-      if (currentPlayer() === "X") {
-        setPlayer1Time(player1Time() + 1);
-        if (player1Time() >= maxTurnTime()) {
-          handleTimeout();
+    let timer: number | undefined;
+
+    if (gameInProgress()) {
+      timer = setInterval(() => {
+        if (currentPlayer() === "X") {
+          setPlayer1Time(player1Time() + 1);
+          if (player1Time() >= maxTurnTime()) {
+            handleTimeout();
+          }
+        } else {
+          setPlayer2Time(player2Time() + 1);
+          if (player2Time() >= maxTurnTime()) {
+            handleTimeout();
+          }
         }
-      } else {
-        setPlayer2Time(player2Time() + 1);
-        if (player2Time() >= maxTurnTime()) {
-          handleTimeout();
-        }
-      }
-    }, timerInterval);
+      }, timerInterval);
+    }
 
     onCleanup(() => {
       clearInterval(timer);
@@ -59,10 +64,7 @@ const TicTacToe: Component = () => {
   const handleTimeout = () => {
     setStatus(`Temps écoulé pour le joueur ${currentPlayer()}`);
     resetTimer();
-
-    // Arrêter le jeu en cours
-    setCurrentPlayer(""); // Définir un joueur vide pour empêcher les clics supplémentaires
-    setStatus("Jeu terminé - Temps écoulé");
+    handleEndGame();
   };
 
   const winningLines: Array<Array<[number, number]>> = [
@@ -140,19 +142,49 @@ const TicTacToe: Component = () => {
     setStatus("En cours");
     resetTimer();
     handleResetGameHistory();
-  };
-
-  const handleWin = (winner: string) => {
-    if (winner === player1Symbol()) {
-      setWinCountX(winCountX() + 1);
-    } else if (winner === player2Symbol()) {
-      setWinCountO(winCountO() + 1);
+    setGameInProgress(true);
+    if (isPlayerVsComputer()) {
+      setPlayer2Name(computerName()); // Définir le nom de l'ordinateur comme nom du joueur 2
     }
   };
 
+  const handleEndGame = () => {
+    setGameInProgress(false);
+    resetTimer();
+  };
+
+  const handleWin = (winner: string) => {
+    let winnerName = "";
+    if (winner === player1Symbol()) {
+      if (player1Symbol() === "X") {
+        setWinCountX(winCountX() + 1);
+        winnerName = player1Name();
+      } else {
+        setWinCountO(winCountO() + 1);
+        winnerName = player1Name();
+      }
+    } else if (winner === player2Symbol()) {
+      if (player2Symbol() === "X") {
+        setWinCountX(winCountX() + 1);
+        winnerName = player2Name();
+      } else {
+        setWinCountO(winCountO() + 1);
+        winnerName = player2Name();
+      }
+    }
+    setStatus(`Victoire de ${winnerName}`);
+  };
+
   const handleClick = (row: number, col: number) => () => {
+    if (!gameInProgress()) return;
+
     const newBoard = [...board().map((row) => [...row])];
-    if (newBoard[row][col] === null && status() === "En cours") {
+    if (
+      newBoard[row][col] === null &&
+      status() === "En cours" &&
+      (!isPlayerVsComputer() ||
+        (isPlayerVsComputer() && currentPlayer() === player1Symbol()))
+    ) {
       newBoard[row][col] = currentPlayer();
       setBoard(newBoard);
       const winningLine = checkWin(newBoard);
@@ -164,9 +196,11 @@ const TicTacToe: Component = () => {
         );
         handleWin(winningLine.winner);
         resetTimer();
+        handleEndGame();
       } else if (checkDraw(newBoard)) {
         setStatus("Égalité");
         resetTimer();
+        handleEndGame();
       } else {
         handleNextTurn();
       }
@@ -176,15 +210,14 @@ const TicTacToe: Component = () => {
   };
 
   const handleNextTurn = () => {
-    setCurrentPlayer(currentPlayer() === "X" ? "O" : "X");
+    setCurrentPlayer(
+      currentPlayer() === player1Symbol() ? player2Symbol() : player1Symbol()
+    );
     resetTimer();
     if (isPlayerVsComputer() && currentPlayer() === player2Symbol()) {
       makeComputerMove(board());
     }
   };
-
-  const currentPlayerSymbol =
-    currentPlayer() === "X" ? player1Symbol() : player2Symbol();
 
   const makeComputerMove = (currentBoard: Array<Array<string | null>>) => {
     const availableMoves: Array<[number, number]> = [];
@@ -202,9 +235,12 @@ const TicTacToe: Component = () => {
     let bestScore = -Infinity;
     let bestMove: [number, number] | null = null;
 
+    const currentPlayerSymbol =
+      currentPlayer() === player1Symbol() ? player1Symbol() : player2Symbol();
+
     availableMoves.forEach(([row, col]) => {
       // Effectuer le mouvement sur une copie temporaire du plateau
-      const newBoard = board().map((row) => [...row]);
+      const newBoard = [...currentBoard.map((row) => [...row])];
       newBoard[row][col] = currentPlayerSymbol;
 
       // Calculer le score du mouvement en utilisant l'algorithme Minimax
@@ -222,6 +258,7 @@ const TicTacToe: Component = () => {
       const newBoard = [...currentBoard.map((row) => [...row])];
       newBoard[bestMove[0]][bestMove[1]] = currentPlayerSymbol;
       setBoard(newBoard);
+      handleNextTurn(); // Appeler handleNextTurn pour passer au tour du joueur
     }
   };
 
@@ -293,6 +330,8 @@ const TicTacToe: Component = () => {
     setIsPlayerVsComputer(!isPlayerVsComputer());
     if (!isPlayerVsComputer()) {
       setPlayer2Name(""); // Réinitialiser le nom du joueur 2 si le mode joueur contre ordinateur est désactivé
+    } else {
+      setPlayer2Name(computerName()); // Définir le nom de l'ordinateur comme nom du joueur 2
     }
   };
 
@@ -334,39 +373,35 @@ const TicTacToe: Component = () => {
       </div>
       <div class="row g-0">
         <div class="col-12 col-md-12">
-          <div class="row">
-            {board().map((row, rowIndex) => (
-              <div class="col-4 col-md-12">
-                <div class="row">
-                  {row.map((cell, colIndex) => {
-                    const winningLine = checkWin(board());
-                    const isWinningCell =
-                      winningLine &&
-                      winningLine.line.some(
-                        ([r, c]) => r === rowIndex && c === colIndex
-                      );
-                    return (
-                      <div class="col-4">
-                        <button
-                          class={`btn styleBtn m-2 ${cell ? "disabled" : ""} ${
-                            isWinningCell ? "winning-cell" : ""
-                          }`}
-                          style={{
-                            width: "100%",
-                            height: "100px",
-                          }}
-                          onClick={handleClick(rowIndex, colIndex)}
-                          disabled={!!cell}
-                        >
-                          {cell}
-                        </button>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
-          </div>
+          {board().map((row, rowIndex) => (
+            <div class="row">
+              {row.map((cell, colIndex) => {
+                const winningLine = checkWin(board());
+                const isWinningCell =
+                  winningLine &&
+                  winningLine.line.some(
+                    ([r, c]) => r === rowIndex && c === colIndex
+                  );
+                return (
+                  <div class="col-4 col-md-4">
+                    <button
+                      class={`btn styleBtn m-2 ${cell ? "disabled" : ""} ${
+                        isWinningCell ? "winning-cell" : ""
+                      }`}
+                      style={{
+                        width: "100%",
+                        height: "100px",
+                      }}
+                      onClick={handleClick(rowIndex, colIndex)}
+                      disabled={!!cell}
+                    >
+                      {cell}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          ))}
         </div>
       </div>
 
@@ -380,12 +415,15 @@ const TicTacToe: Component = () => {
         </div>
       </div>
       <div class="d-flex justify-content-center align-items-center flex-wrap">
+        <button class="margePlayer" onClick={handleReset}>
+          Start
+        </button>
+        <button class="margePlayer" onClick={handleReset}>
+          Restart
+        </button>
         <button class="margePlayer" onClick={handleUndoMove}>
           Annuler le dernier coup
         </button>{" "}
-        <button class="margePlayer" onClick={handleReset}>
-          Recommencer
-        </button>
         {/* Nouvelle fonctionnalité : Annuler le dernier coup */}
         <button class="margePlayer" onClick={handleResetStats}>
           Réinitialiser les statistiques
@@ -413,7 +451,7 @@ const TicTacToe: Component = () => {
           <label>
             Joueur 1 :&nbsp&nbsp
             <input
-              class="margePlayer"
+              class="margePlayer inputPlayer"
               type="text"
               placeholder="Pseudo"
               value={player1Name()}
@@ -424,15 +462,14 @@ const TicTacToe: Component = () => {
               onInput={(e) => setPlayer1Symbol(e.target.value)}
             >
               <option value="X">X</option>
-              <option value="O">O</option>
             </select>
           </label>
           <br />
-          {!isPlayerVsComputer() && ( // Afficher le joueur 2 uniquement si le mode joueur contre ordinateur est désactivé
+          {!isPlayerVsComputer() && (
             <label>
-              Joueur 2 :&nbsp
+              Joueur 2 :&nbsp;
               <input
-                class="margePlayer"
+                class="margePlayer inputPlayer"
                 type="text"
                 placeholder="Pseudo"
                 value={player2Name()}
@@ -442,10 +479,14 @@ const TicTacToe: Component = () => {
                 value={player2Symbol()}
                 onInput={(e) => setPlayer2Symbol(e.target.value)}
               >
-                <option value="X">X</option>
                 <option value="O">O</option>
               </select>
             </label>
+          )}
+          {isPlayerVsComputer() && (
+            <div>
+              ORDI : {computerName()} ({player2Symbol()})
+            </div>
           )}
         </form>
         <div class="text-center mt-5 mb-5">

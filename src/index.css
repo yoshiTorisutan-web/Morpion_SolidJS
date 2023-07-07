@@ -115,6 +115,17 @@ form {
   margin-right: 20px;
 }
 
+.inputPlayer {
+  background-color: #343a40;
+  border: 2px solid #ffffff;
+  color: #ffffff;
+  margin-bottom: 20px;
+}
+
+.inputPlayer::placeholder {
+  color: #999999;
+}
+
 .margeCheckbox {
   margin-right: 5px;
 }
