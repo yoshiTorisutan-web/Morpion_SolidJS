@@ -22,3 +22,4 @@ Ceci est une application de jeu de Morpion réalisée en SolidJS et Bootstrap. I
 * SolidJS
 * HTML/CSS/JS
 * Bootstrap
+* ViteJS
