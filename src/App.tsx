@@ -1,3 +1,6 @@
+// Importation SolidJS et Bootstrap (index.html)
+// Importation fichier CSS
+
 import { createSignal, Component, createEffect, onCleanup } from "solid-js";
 import "./index.css";
 
@@ -7,6 +10,8 @@ interface WinningLine {
 }
 
 const TicTacToe: Component = () => {
+  // Déclaration des états et initialisation
+
   const [board, setBoard] = createSignal<Array<Array<string | null>>>(
     Array(3).fill(Array(3).fill(null))
   );
@@ -33,6 +38,8 @@ const TicTacToe: Component = () => {
   const timerInterval = 1000; // Interval de 1 seconde pour le timer
 
   createEffect(() => {
+    // Effet pour gérer le timer du tour
+
     let timer: number | undefined;
 
     if (gameInProgress()) {
@@ -57,17 +64,23 @@ const TicTacToe: Component = () => {
   });
 
   const resetTimer = () => {
+    // Réinitialise les compteurs de temps des joueurs à 0
+
     setPlayer1Time(0);
     setPlayer2Time(0);
   };
 
   const handleTimeout = () => {
+    // Gère le cas où le temps du joueur est écoulé
+
     setStatus(`Temps écoulé pour le joueur ${currentPlayer()}`);
     resetTimer();
     handleEndGame();
   };
 
   const winningLines: Array<Array<[number, number]>> = [
+    // Liste des lignes gagnantes possibles
+
     [
       [0, 0],
       [0, 1],
@@ -113,6 +126,8 @@ const TicTacToe: Component = () => {
   const checkWin = (
     newBoard: Array<Array<string | null>>
   ): WinningLine | null => {
+    // Vérifie s'il y a une victoire
+
     for (let line of winningLines) {
       const [row1, col1] = line[0];
       const [row2, col2] = line[1];
@@ -133,10 +148,14 @@ const TicTacToe: Component = () => {
   };
 
   const checkDraw = (newBoard: Array<Array<string | null>>): boolean => {
+    // Vérifie s'il y a un match nul (toutes les cases sont remplies)
+
     return newBoard.flat().every((cell) => cell !== null);
   };
 
   const handleReset = () => {
+    // Réinitialise le jeu
+
     setBoard(Array(3).fill(Array(3).fill(null)));
     setCurrentPlayer("X");
     setStatus("En cours");
@@ -149,11 +168,15 @@ const TicTacToe: Component = () => {
   };
 
   const handleEndGame = () => {
+    // Gère la fin du jeu
+
     setGameInProgress(false);
     resetTimer();
   };
 
   const handleWin = (winner: string) => {
+    // Gère la victoire d'un joueur
+
     let winnerName = "";
     if (winner === player1Symbol()) {
       if (player1Symbol() === "X") {
@@ -176,6 +199,8 @@ const TicTacToe: Component = () => {
   };
 
   const handleClick = (row: number, col: number) => () => {
+    // Gère le clic sur une case du plateau
+
     if (!gameInProgress()) return;
 
     const newBoard = [...board().map((row) => [...row])];
@@ -210,6 +235,8 @@ const TicTacToe: Component = () => {
   };
 
   const handleNextTurn = () => {
+    // Passe au tour suivant
+
     setCurrentPlayer(
       currentPlayer() === player1Symbol() ? player2Symbol() : player1Symbol()
     );
@@ -220,6 +247,8 @@ const TicTacToe: Component = () => {
   };
 
   const makeComputerMove = (currentBoard: Array<Array<string | null>>) => {
+    // Génère le mouvement de l'ordinateur
+
     const availableMoves: Array<[number, number]> = [];
 
     // Trouver tous les mouvements disponibles sur le plateau
@@ -267,6 +296,8 @@ const TicTacToe: Component = () => {
     depth: number,
     isMaximizingPlayer: boolean
   ): number => {
+    // Implémentation de l'algorithme Minimax pour choisir le meilleur mouvement
+
     const result = checkWin(board);
 
     if (result) {
@@ -327,6 +358,8 @@ const TicTacToe: Component = () => {
   };
 
   const handleTogglePlayerVsComputer = () => {
+    // Active/désactive le mode joueur contre ordinateur
+
     setIsPlayerVsComputer(!isPlayerVsComputer());
     if (!isPlayerVsComputer()) {
       setPlayer2Name(""); // Réinitialiser le nom du joueur 2 si le mode joueur contre ordinateur est désactivé
@@ -336,10 +369,14 @@ const TicTacToe: Component = () => {
   };
 
   const handleDifficultyChange = (e: Event) => {
+    // Gère le changement de difficulté
+
     setDifficulty((e.target as HTMLSelectElement).value);
   };
 
   const handleUndoMove = () => {
+    // Annule le dernier coup joué
+
     const history = gameHistory();
     if (history.length > 0) {
       const updatedHistory = history.slice(0, -1);
@@ -352,13 +389,19 @@ const TicTacToe: Component = () => {
   };
 
   const handleResetGameHistory = () => {
+    // Réinitialise l'historique des parties
+
     setGameHistory([]);
   };
 
   const handleResetStats = () => {
+    // Réinitialise les statistiques
+
     setWinCountX(0);
     setWinCountO(0);
   };
+
+  //Partie IHM du jeu du Morpion
 
   return (
     <div class="container">
