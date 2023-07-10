@@ -450,7 +450,7 @@ const TicTacToe: Component = () => {
         Temps joueur 2 : {player2Time()} secondes
       </div>
       <div class="row g-0">
-        <div class="col-12 col-md-12">
+      <div class="col-12 col-md-12">
           {board().map((row, rowIndex) => (
             <div class="row justify-content-center">
               {row.map((cell, colIndex) => {
@@ -576,10 +576,11 @@ const TicTacToe: Component = () => {
             </div>
           )}
         </form>
-        <div class="text-center mt-5 mb-5">
+        
+      </div>
+      <div class="text-center mt-5 mb-5">
           <p>© Copyright - Tristan BOSSARD</p>
         </div>
-      </div>
     </div>
   );
 };
